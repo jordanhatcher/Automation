@@ -1,0 +1,5 @@
+nodes:
+  pipe_node:
+    label: pipe_node
+    config:
+      pipe_path: /var/
