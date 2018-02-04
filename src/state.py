@@ -52,4 +52,4 @@ class State:
                 self.state_dict[node_label][key] = value
                 topic = 'state.{}.{}'.format(node_label, key)
                 message = {'previous_value': previous_value, 'value': value}
-                pub.sendMessage(topic, **message)
+                pub.sendMessage(topic, msg=message)

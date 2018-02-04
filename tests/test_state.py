@@ -21,13 +21,13 @@ class TestState(unittest.TestCase):
         """
 
         warnings.simplefilter('ignore')
-        def test_listener(**message):
+        def test_listener(msg):
             """
             Runs assertions on the received message
             """
 
-            self.assertEqual(message['value'], 'initial_value')
-            self.assertEqual(message['previous_value'], None)
+            self.assertEqual(msg['value'], 'initial_value')
+            self.assertEqual(msg['previous_value'], None)
 
         _state = State()
         _state.add_node('test_node_label')

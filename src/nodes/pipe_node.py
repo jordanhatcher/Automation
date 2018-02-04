@@ -70,7 +70,7 @@ class PipeNode(Node, threading.Thread):
                     line = pipe.read()
                     if not line:
                         break
-                    pub.sendMessage('system.messages', **{
-                        'originator': self.label,
+
+                    pub.sendMessage('messages.{}'.format(self.label), msg={
                         'content': line
                     })

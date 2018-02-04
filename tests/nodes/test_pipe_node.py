@@ -23,14 +23,15 @@ class TestPipeNode(unittest.TestCase):
         """
 
         warnings.simplefilter('ignore')
-        def test_listener(**message):
+        def test_listener(msg):
             """
             Runs assertions on the received message
             """
 
-            self.assertIsNotNone(message)
+            self.assertIsNotNone(msg)
 
         pub.subscribe(test_listener, 'state.pipe_node')
+        pub.subscribe(test_listener, 'messages.pipe_node')
 
         _state = State()
         _pipe_node = PipeNode('pipe_node', _state,
@@ -38,3 +39,4 @@ class TestPipeNode(unittest.TestCase):
         pub.sendMessage('system.node.pipe_node.start')
         time.sleep(1)
         pub.sendMessage('system.node.pipe_node.stop')
+        _pipe_node.join()
