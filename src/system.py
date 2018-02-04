@@ -47,6 +47,9 @@ class System():
         Stops the automation system
         """
 
+        for node_label in self.nodes:
+            pub.sendMessage('system.node.{}.stop'.format(node_label))
+
     def restart(self):
         """
         Restarts the automation system
