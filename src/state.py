@@ -29,22 +29,27 @@ class State:
 
         self.state_dict[node_label] = {}
 
-    def add_state(self, node_label, key):
+    def add_states(self, node_label, keys):
         """
-        Helper function to add a new state key for a node label.
-        """
-
-        self.state_dict[node_label][key] = None
-
-    def update_state(self, node_label, key, value):
-        """
-        Updates a state (key) of a node (node_label) with a new value. A
-        message is published to the topic 'state.<node_label>.<key>' once
-        the value is updated to activate conditions listening to the state.
+        Helper function to add new state keys for a node label.
         """
 
-        previous_value = self.state_dict[node_label][key]
-        self.state_dict[node_label][key] = value
-        topic = 'state.{}.{}'.format(node_label, key)
-        message = {'previous_value': previous_value, 'value': value}
-        pub.sendMessage(topic, **message)
+        for key in keys:
+            self.state_dict[node_label][key] = None
+
+    def update_states(self, node_label, **states):
+        """
+        Updates states (keys) of a node (node_label) with new values. A
+        message is published to the topic 'state.<node_label>.<key>' for the
+        values that are updated to activate conditions listening to the state.
+        """
+
+        for key in states:
+            value = states[key]
+            previous_value = self.state_dict[node_label][key]
+
+            if not value == previous_value:
+                self.state_dict[node_label][key] = value
+                topic = 'state.{}.{}'.format(node_label, key)
+                message = {'previous_value': previous_value, 'value': value}
+                pub.sendMessage(topic, **message)

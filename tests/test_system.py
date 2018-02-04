@@ -8,8 +8,8 @@ import unittest
 from unittest.mock import patch, mock_open
 
 from src.system import System
-from src.custom_conditions.pipe_conditions import PipeConditions
-from src.custom_nodes.pipe_node import PipeNode
+from src.conditions.pipe_conditions import PipeConditions
+from src.nodes.pipe_node import PipeNode
 
 
 MOCK_NODE_CONFIG = """

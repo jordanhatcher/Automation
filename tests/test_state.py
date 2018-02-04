@@ -31,9 +31,9 @@ class TestState(unittest.TestCase):
 
         _state = State()
         _state.add_node('test_node_label')
-        _state.add_state('test_node_label', 'test_state_key')
+        _state.add_states('test_node_label', ['test_state_key'])
         pub.subscribe(test_listener, 'state.test_node_label')
-        _state.update_state('test_node_label', 'test_state_key', 'initial_value')
+        _state.update_states('test_node_label', **{'test_state_key': 'initial_value'})
 
 if __name__ == '__main__':
     SUITE = unittest.TestLoader().loadTestsFromTestCase(TestState)

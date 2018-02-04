@@ -66,10 +66,10 @@ class System():
             try:
                 nodes = yaml.load(node_config_file)
                 for label, node_contents in nodes.items():
-                    module_name = '.custom_nodes.{}'.format(node_contents['module'])
+                    module_name = '.nodes.{}'.format(node_contents['module'])
                     module = importlib.import_module(module_name, __package__)
                     node_class = getattr(module, module.NODE_CLASS_NAME)
-                    new_node = node_class(label, node_contents['config'])
+                    new_node = node_class(label, self.state, node_contents['config'])
                     self.nodes[label] = new_node
             except yaml.YAMLError as error:
                 print(error)
@@ -85,7 +85,7 @@ class System():
             try:
                 conditions = yaml.load(condition_config_file)
                 for condition in conditions:
-                    module_name = '.custom_conditions.{}'.format(condition)
+                    module_name = '.conditions.{}'.format(condition)
                     module = importlib.import_module(module_name, __package__)
                     new_condition = getattr(module, module.CONDITION_CLASS_NAME)()
                     self.conditions[condition] = new_condition
