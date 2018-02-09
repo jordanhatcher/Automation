@@ -33,14 +33,17 @@ class System():
 
         pub.subscribe(self.stop, 'system.stop')
         pub.subscribe(self.restart, 'system.restart')
-        self.start()
 
     def start(self):
         """
         Starts the automation system
         """
+
         self.load_nodes()
         self.load_conditions()
+
+        for node_label in self.nodes:
+            pub.sendMessage('system.node.{}.start'.format(node_label))
 
     def stop(self):
         """

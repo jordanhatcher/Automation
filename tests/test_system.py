@@ -16,7 +16,7 @@ MOCK_NODE_CONFIG = """
 pipe_node:
   module: pipe_node
   config:
-    file: /tmp/automation.pip
+    pipe_path: /tmp/automation.pipe
 """
 
 MOCK_CONDITION_CONFIG = """
@@ -28,17 +28,11 @@ class TestSystem(unittest.TestCase):
     Test case class
     """
 
-    @patch('builtins.open', new_callable=mock_open)
+    @patch('builtins.open', new_callable=mock_open, read_data=MOCK_NODE_CONFIG)
     def test_load_nodes(self, mocked_open):
         """
         Checks that nodes are loaded from the node_config.yml file
         """
-
-        mocked_open.side_effect = [
-            mock_open(read_data=MOCK_NODE_CONFIG).return_value,
-            mock_open(read_data=MOCK_CONDITION_CONFIG).return_value,
-            mock_open(read_data=MOCK_NODE_CONFIG).return_value
-        ]
 
         syst = System()
         syst.load_nodes()
@@ -50,12 +44,6 @@ class TestSystem(unittest.TestCase):
         """
         Checks that conditions are loaded from the condition_config.yml file
         """
-
-        mocked_open.side_effect = [
-            mock_open(read_data=MOCK_NODE_CONFIG).return_value,
-            mock_open(read_data=MOCK_CONDITION_CONFIG).return_value,
-            mock_open(read_data=MOCK_CONDITION_CONFIG).return_value
-        ]
 
         syst = System()
         syst.load_conditions()
