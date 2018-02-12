@@ -4,11 +4,14 @@ test_pipe_condtions
 Test suite for pipe_conditions.py
 """
 
+import logging
 import unittest
 import warnings
 
 from pubsub import pub
 from src.conditions.pipe_conditions import PipeConditions
+
+logging.disable(logging.ERROR)
 
 class TestPipeConditions(unittest.TestCase):
     """

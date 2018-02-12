@@ -4,6 +4,7 @@ test_system
 Test suite for system.py
 """
 
+import logging
 import unittest
 from unittest.mock import patch, mock_open
 
@@ -11,6 +12,7 @@ from src.system import System
 from src.conditions.pipe_conditions import PipeConditions
 from src.nodes.pipe_node import PipeNode
 
+logging.disable(logging.ERROR)
 
 MOCK_NODE_CONFIG = """
 pipe_node:

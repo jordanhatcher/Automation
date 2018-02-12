@@ -4,11 +4,14 @@ test_state
 Test suite for state.py
 """
 
+import logging
 import unittest
 import warnings
 
 from pubsub import pub
 from src.state import State
+
+logging.disable(logging.ERROR)
 
 class TestState(unittest.TestCase):
     """

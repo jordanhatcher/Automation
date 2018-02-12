@@ -4,6 +4,7 @@ integration
 Integration test suite
 """
 
+import logging
 import time
 import threading
 import unittest
@@ -11,6 +12,7 @@ from unittest.mock import patch, mock_open
 import warnings
 from src.system import System
 
+logging.disable(logging.ERROR)
 
 MOCK_NODE_CONFIG = """
 pipe_node:

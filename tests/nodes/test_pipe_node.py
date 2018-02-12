@@ -4,6 +4,7 @@ test_pipe_node
 Test suite for pipe_node.py
 """
 
+import logging
 import unittest
 import warnings
 import time
@@ -11,6 +12,8 @@ import time
 from pubsub import pub
 from src.state import State
 from src.nodes.pipe_node import PipeNode
+
+logging.disable(logging.ERROR)
 
 class TestPipeNode(unittest.TestCase):
     """
