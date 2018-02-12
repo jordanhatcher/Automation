@@ -4,10 +4,13 @@ pipe_node
 This module contains the PipeNode class
 """
 
+import logging
 import os
 import threading
 from pubsub import pub
 from ..node import Node
+
+LOGGER = logging.getLogger(__name__)
 
 NODE_CLASS_NAME = 'PipeNode'
 
@@ -33,11 +36,14 @@ class PipeNode(Node, threading.Thread):
         pub.subscribe(self.stop, 'system.node.{}.stop'.format(self.label))
         pub.subscribe(self.start, 'system.node.{}.start'.format(self.label))
 
+        LOGGER.debug('Initialized %s', self.label)
+
     def update_state(self):
         """
         Gets the state of the node.
         """
 
+        LOGGER.info('Updating state %s', self.label)
         state = {'running': not self.running_event.is_set()}
         self.state.update_states(self.label, **state)
 
@@ -46,16 +52,20 @@ class PipeNode(Node, threading.Thread):
         Stops the node
         """
 
+        LOGGER.info('Stopping %s', self.label)
         self.running_event.set()
         with open(self.config['pipe_path'], 'w') as pipe:
             pipe.write(' ') # write whitespace to the pipe to unblock the open call in run()
 
         self.update_state()
+        LOGGER.info('Stopped %s', self.label)
 
     def run(self):
         """
         Run loop
         """
+
+        LOGGER.info('Started %s', self.label)
 
         pipe_path = self.config['pipe_path']
         if not os.path.exists(pipe_path):
@@ -71,6 +81,8 @@ class PipeNode(Node, threading.Thread):
                     if not line:
                         break
 
+                    LOGGER.info('Received input')
+                    LOGGER.debug('Input: %s', line)
                     pub.sendMessage('messages.{}'.format(self.label), msg={
                         'content': line
                     })

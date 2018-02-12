@@ -4,7 +4,10 @@ state
 The state module contains the State class.
 """
 
+import logging
 from pubsub import pub
+
+LOGGER = logging.getLogger(__name__)
 
 class State:
     """
@@ -21,12 +24,14 @@ class State:
         """
 
         self.state_dict = {}
+        LOGGER.debug('Initialized State')
 
     def add_node(self, node_label):
         """
         Adds a new node label to the state dictionary.
         """
 
+        LOGGER.debug('Added node: %s', node_label)
         self.state_dict[node_label] = {}
 
     def add_states(self, node_label, keys):
@@ -34,6 +39,7 @@ class State:
         Helper function to add new state keys for a node label.
         """
 
+        LOGGER.debug('Added states: %s', keys)
         for key in keys:
             self.state_dict[node_label][key] = None
 
@@ -44,11 +50,13 @@ class State:
         values that are updated to activate conditions listening to the state.
         """
 
+        LOGGER.debug('Updating states: %s', states)
         for key in states:
             value = states[key]
             previous_value = self.state_dict[node_label][key]
 
             if not value == previous_value:
+                LOGGER.debug('Creating state change event for %s', key)
                 self.state_dict[node_label][key] = value
                 topic = 'state.{}.{}'.format(node_label, key)
                 message = {'previous_value': previous_value, 'value': value}
