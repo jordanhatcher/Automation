@@ -1,5 +1,4 @@
-nodes:
-  pipe_node:
-    label: pipe_node
-    config:
-      pipe_path: /var/
+pipe_node:
+  module: pipe_node
+  config:
+    pipe_path: /var/automation/automation.pipe

@@ -8,6 +8,8 @@ import importlib
 import logging
 import os
 import yaml
+from apscheduler.schedulers.background import BackgroundScheduler
+from pytz import utc
 from pubsub import pub
 from .state import State
 
@@ -15,9 +17,6 @@ FORMAT = '[%(asctime)s] %(levelname)s - %(name)s - %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 LOGGER = logging.getLogger(__name__)
-
-NODE_CONFIG_FILE_NAME = 'node_config.yml'
-CONDITION_CONFIG_FILE_NAME = 'condition_config.yml'
 LOCAL_DIR = os.path.dirname(__file__)
 
 class System():
@@ -27,12 +26,22 @@ class System():
 
     """
 
-    def __init__(self):
+    def __init__(self, node_config_file=None, condition_config_file=None):
         """
         Constructor
         """
 
+        self.node_config_file = 'node_config.yml'
+        self.condition_config_file = 'condition_config.yml'
+
+        if node_config_file:
+            self.node_config_file = node_config_file
+
+        if condition_config_file:
+            self.condition_config_file = condition_config_file
+
         self.state = State()
+        self.scheduler = BackgroundScheduler(timezone=utc)
         self.nodes = {}
         self.conditions = {}
 
@@ -58,6 +67,11 @@ class System():
             LOGGER.debug('starting node %s', node_label)
             pub.sendMessage('system.node.{}.start'.format(node_label))
 
+        LOGGER.info('Starting scheduler')
+        self.scheduler.start()
+
+        LOGGER.info('Started')
+
     def stop(self):
         """
         Stops the automation system
@@ -68,6 +82,11 @@ class System():
         for node_label in self.nodes:
             LOGGER.debug('stopping node %s', node_label)
             pub.sendMessage('system.node.{}.stop'.format(node_label))
+
+        LOGGER.info('Stopping scheduler')
+        self.scheduler.shutdown()
+
+        LOGGER.info('Stopped')
 
     def restart(self):
         """
@@ -85,7 +104,7 @@ class System():
         """
 
         self.nodes = {}
-        config_path = os.path.join(LOCAL_DIR, NODE_CONFIG_FILE_NAME)
+        config_path = os.path.join(LOCAL_DIR, self.node_config_file)
         with open(config_path, 'r') as node_config_file:
             try:
                 nodes = yaml.load(node_config_file)
@@ -105,7 +124,7 @@ class System():
         """
 
         self.conditions = {}
-        config_path = os.path.join(LOCAL_DIR, CONDITION_CONFIG_FILE_NAME)
+        config_path = os.path.join(LOCAL_DIR, self.condition_config_file)
         with open(config_path, 'r') as condition_config_file:
             try:
                 conditions = yaml.load(condition_config_file)
@@ -113,7 +132,7 @@ class System():
                     LOGGER.debug('Loading condition %s', condition)
                     module_name = '.conditions.{}'.format(condition)
                     module = importlib.import_module(module_name, __package__)
-                    new_condition = getattr(module, module.CONDITION_CLASS_NAME)()
+                    new_condition = getattr(module, module.CONDITION_CLASS_NAME)(self.scheduler)
                     self.conditions[condition] = new_condition
             except yaml.YAMLError as error:
                 LOGGER.error('Unable to read condition_config.yml: %s', error)

@@ -12,9 +12,18 @@ class Condition():
     met. This class is a superclass that all other conditions extend.
     """
 
-    def __init__(self, module):
+    def __init__(self, scheduler):
         """
         Constructor
         """
 
-        self.module = module
+        self.scheduler = scheduler
+
+    def is_active(self):
+        """
+        Conditions will override this method to implement custom logic for
+        checking if the condition is active or not. The default is that the
+        condition will be active.
+        """
+
+        return True
