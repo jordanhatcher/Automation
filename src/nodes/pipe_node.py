@@ -69,6 +69,7 @@ class PipeNode(Node, threading.Thread):
 
         pipe_path = self.config['pipe_path']
         if not os.path.exists(pipe_path):
+            os.makedirs(os.path.dirname(pipe_path), exist_ok=True)
             os.mkfifo(pipe_path)
 
         self.running_event.clear()

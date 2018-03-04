@@ -136,3 +136,7 @@ class System():
                     self.conditions[condition] = new_condition
             except yaml.YAMLError as error:
                 LOGGER.error('Unable to read condition_config.yml: %s', error)
+
+if __name__ == '__main__':
+    system = System()
+    system.start()
