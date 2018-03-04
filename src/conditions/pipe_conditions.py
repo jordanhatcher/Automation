@@ -18,12 +18,12 @@ class PipeConditions(Condition):
     Conditions for reading from named pipes
     """
 
-    def __init__(self, scheduler):
+    def __init__(self, scheduler, schedule=None):
         """
         Constructor
         """
 
-        Condition.__init__(self, scheduler)
+        Condition.__init__(self, scheduler, schedule)
         pub.subscribe(self.evaluate, 'messages.pipe_node')
         LOGGER.debug('Initialized')
 

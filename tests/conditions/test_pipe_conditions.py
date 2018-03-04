@@ -34,7 +34,7 @@ class TestPipeConditions(unittest.TestCase):
 
             self.called = True
 
-        _pipe_conditions = PipeConditions(None)
+        _pipe_conditions = PipeConditions(None, None)
         pub.subscribe(test_listener, 'system.stop')
         pub.sendMessage('messages.pipe_node', msg={'content':'stop'})
         self.assertTrue(self.called)

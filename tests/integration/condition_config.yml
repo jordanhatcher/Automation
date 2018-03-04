@@ -1,1 +1,2 @@
-- pipe_conditions
+pipe_conditions:
+  schedule: '* * * * *'

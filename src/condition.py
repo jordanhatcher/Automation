@@ -12,12 +12,13 @@ class Condition():
     met. This class is a superclass that all other conditions extend.
     """
 
-    def __init__(self, scheduler):
+    def __init__(self, scheduler, schedule=None):
         """
         Constructor
         """
 
         self.scheduler = scheduler
+        self.schedule = schedule
 
     def is_active(self):
         """

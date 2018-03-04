@@ -128,11 +128,17 @@ class System():
         with open(config_path, 'r') as condition_config_file:
             try:
                 conditions = yaml.load(condition_config_file)
-                for condition in conditions:
+                for condition, condition_config in conditions.items():
+                    schedule = None
+
+                    if 'schedule' in condition_config:
+                        schedule = condition_config['schedule']
+
                     LOGGER.debug('Loading condition %s', condition)
                     module_name = '.conditions.{}'.format(condition)
                     module = importlib.import_module(module_name, __package__)
-                    new_condition = getattr(module, module.CONDITION_CLASS_NAME)(self.scheduler)
+                    condition_class = getattr(module, module.CONDITION_CLASS_NAME)
+                    new_condition = condition_class(self.scheduler, schedule)
                     self.conditions[condition] = new_condition
             except yaml.YAMLError as error:
                 LOGGER.error('Unable to read condition_config.yml: %s', error)

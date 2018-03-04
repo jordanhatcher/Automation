@@ -22,7 +22,8 @@ pipe_node:
 """
 
 MOCK_CONDITION_CONFIG = """
-- pipe_conditions
+pipe_conditions:
+  schedule: '* * * * *'
 """
 
 class TestSystem(unittest.TestCase):
