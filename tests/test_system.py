@@ -16,9 +16,11 @@ logging.disable(logging.ERROR)
 
 MOCK_NODE_CONFIG = """
 pipe_node:
-  module: pipe_node
+  node: pipe_node
   config:
     pipe_path: /tmp/automation.pipe
+test_node:
+  node: pipe_node
 """
 
 MOCK_CONDITION_CONFIG = """
@@ -40,6 +42,7 @@ class TestSystem(unittest.TestCase):
         syst = System()
         syst.load_nodes()
         self.assertIsInstance(syst.nodes['pipe_node'], PipeNode)
+        self.assertIsInstance(syst.nodes['test_node'], PipeNode)
         mocked_open.assert_called()
 
     @patch('builtins.open', new_callable=mock_open, read_data=MOCK_CONDITION_CONFIG)

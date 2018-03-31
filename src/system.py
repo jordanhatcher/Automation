@@ -19,6 +19,9 @@ logging.basicConfig(format=FORMAT, level=logging.INFO)
 LOGGER = logging.getLogger(__name__)
 LOCAL_DIR = os.path.dirname(__file__)
 
+MODULE_TYPES = ('conditions', 'nodes')
+CLASS_NAME_CONSTS = ('NODE_CLASS_NAME', 'CONDITION_CLASS_NAME')
+
 class System():
     """
     System
@@ -42,8 +45,12 @@ class System():
 
         self.state = State()
         self.scheduler = BackgroundScheduler(timezone=utc)
+        self.loaded_modules = {'nodes': {}, 'conditions': {}}
         self.nodes = {}
         self.conditions = {}
+
+        self.load_modules(LOCAL_DIR)
+        self.load_packages()
 
         pub.subscribe(self.stop, 'system.stop')
         pub.subscribe(self.restart, 'system.restart')
@@ -56,16 +63,15 @@ class System():
         """
 
         LOGGER.info('Starting')
-
         self.load_nodes()
         self.load_conditions()
 
-        LOGGER.debug('System nodes: %s', self.nodes)
-        LOGGER.debug('System conditions: %s', self.conditions)
+        LOGGER.debug(f'System nodes: {self.nodes}')
+        LOGGER.debug(f'System conditions: {self.conditions}')
 
         for node_label in self.nodes:
-            LOGGER.debug('starting node %s', node_label)
-            pub.sendMessage('system.node.{}.start'.format(node_label))
+            LOGGER.debug(f'starting node {node_label}')
+            pub.sendMessage(f'system.node.{node_label}.start')
 
         LOGGER.info('Starting scheduler')
         self.scheduler.start()
@@ -80,8 +86,8 @@ class System():
         LOGGER.info('Stopping')
 
         for node_label in self.nodes:
-            LOGGER.debug('stopping node %s', node_label)
-            pub.sendMessage('system.node.{}.stop'.format(node_label))
+            LOGGER.debug(f'stopping node {node_label}')
+            pub.sendMessage(f'system.node.{node_label}.stop')
 
         LOGGER.info('Stopping scheduler')
         self.scheduler.shutdown()
@@ -109,14 +115,17 @@ class System():
             try:
                 nodes = yaml.load(node_config_file)
                 for label, node_contents in nodes.items():
-                    LOGGER.debug('Loading node %s', label)
-                    module_name = '.nodes.{}'.format(node_contents['module'])
-                    module = importlib.import_module(module_name, __package__)
-                    node_class = getattr(module, module.NODE_CLASS_NAME)
-                    new_node = node_class(label, self.state, node_contents['config'])
+                    LOGGER.debug(f'Loading node {label}')
+                    node_name = node_contents['node']
+                    node_module = self.loaded_modules['nodes'][node_name]
+                    node_class = getattr(node_module, node_module.NODE_CLASS_NAME)
+                    node_config = node_contents['config'] if 'config' in node_contents else None
+                    new_node = node_class(label, self.state, node_config)
                     self.nodes[label] = new_node
             except yaml.YAMLError as error:
-                LOGGER.error('Unable to read node_config.yml: %s', error)
+                error_msg = f'Unable to read node_config.yml: {error}'
+                LOGGER.error(error_msg)
+                raise Exception(error_msg)
 
     def load_conditions(self):
         """
@@ -128,21 +137,60 @@ class System():
         with open(config_path, 'r') as condition_config_file:
             try:
                 conditions = yaml.load(condition_config_file)
-                for condition, condition_config in conditions.items():
+                for condition_name, condition_config in conditions.items():
                     schedule = None
 
-                    if 'schedule' in condition_config:
-                        schedule = condition_config['schedule']
+                    if condition_config is not None:
+                        if 'schedule' in condition_config:
+                            schedule = condition_config['schedule']
 
-                    LOGGER.debug('Loading condition %s', condition)
-                    module_name = '.conditions.{}'.format(condition)
-                    module = importlib.import_module(module_name, __package__)
-                    condition_class = getattr(module, module.CONDITION_CLASS_NAME)
+                    LOGGER.debug(f'Loading condition {condition_name}')
+                    condition_module = self.loaded_modules['conditions'][condition_name]
+                    condition_class = getattr(condition_module,
+                                              condition_module.CONDITION_CLASS_NAME)
                     new_condition = condition_class(self.scheduler, schedule)
-                    self.conditions[condition] = new_condition
+                    self.conditions[condition_name] = new_condition
             except yaml.YAMLError as error:
-                LOGGER.error('Unable to read condition_config.yml: %s', error)
+                error_msg = f'Unable to read condition_config.yml: {error}'
+                LOGGER.error(error_msg)
+                raise Exception(error_msg)
+
+    def load_packages(self):
+        """
+        Loads all packages from the package directory
+        """
+
+        packages_path = os.path.join(LOCAL_DIR, 'packages')
+        with os.scandir(path=packages_path) as packages:
+            for package in filter(lambda pkg: pkg.is_dir(), packages):
+                package_path = os.path.join(packages_path, package.name)
+                self.load_modules(package_path, package.name)
+
+    def load_modules(self, package_path, package=None):
+        """
+        Loads a module from a package
+        """
+
+        if package is not None:
+            package_name = f'.packages.{package}'
+        else:
+            package_name = ''
+
+        for module_type in MODULE_TYPES:
+            module_type_path = os.path.join(package_path, module_type)
+            with os.scandir(path=module_type_path) as modules:
+                for module_file in modules:
+                    if module_file.name.endswith('.py') and not module_file.name.startswith('__'):
+                        module_name = f'{package_name}.{module_type}.{module_file.name[:-3]}'
+                        module = importlib.import_module(module_name, __package__)
+
+                        if any(hasattr(module, class_name) for class_name in CLASS_NAME_CONSTS):
+                            if package is not None:
+                                module_system_name = f'{package}.{module_file.name[:-3]}'
+                            else:
+                                module_system_name = f'{module_file.name[:-3]}'
+                            self.loaded_modules[module_type][module_system_name] = module
 
 if __name__ == '__main__':
-    system = System()
-    system.start()
+    SYSTEM = System()
+    SYSTEM.start()

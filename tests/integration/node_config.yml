@@ -1,4 +1,4 @@
 pipe_node:
-  module: pipe_node
+  node: pipe_node
   config:
     pipe_path: /tmp/automation.pipe
