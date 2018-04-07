@@ -33,8 +33,8 @@ class PipeNode(Node, threading.Thread):
         self.running_event = threading.Event()
         self.state.add_states(self.label, ['running'])
 
-        pub.subscribe(self.stop, 'system.node.{}.stop'.format(self.label))
-        pub.subscribe(self.start, 'system.node.{}.start'.format(self.label))
+        pub.subscribe(self.stop, f'{self.label}.stop')
+        pub.subscribe(self.start, f'{self.label}.start')
 
         LOGGER.debug('Initialized %s', self.label)
 

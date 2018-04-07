@@ -9,7 +9,7 @@ import logging
 import time
 import threading
 import unittest
-from src.system import System
+from src.system.system import System
 
 logging.disable(logging.ERROR)
 

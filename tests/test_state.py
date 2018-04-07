@@ -9,7 +9,7 @@ import unittest
 import warnings
 
 from pubsub import pub
-from src.state import State
+from src.system.state import State
 
 logging.disable(logging.ERROR)
 
