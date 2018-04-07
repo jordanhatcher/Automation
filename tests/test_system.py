@@ -8,9 +8,9 @@ import logging
 import unittest
 from unittest.mock import patch, mock_open
 
-from src.system import System
-from src.conditions.pipe_conditions import PipeConditions
-from src.nodes.pipe_node import PipeNode
+from src.system.system import System
+from src.system.conditions.pipe_conditions import PipeConditions
+from src.system.nodes.pipe_node import PipeNode
 
 logging.disable(logging.ERROR)
 

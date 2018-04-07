@@ -71,7 +71,7 @@ class System():
 
         for node_label in self.nodes:
             LOGGER.debug(f'starting node {node_label}')
-            pub.sendMessage(f'system.node.{node_label}.start')
+            pub.sendMessage(f'{node_label}.start')
 
         LOGGER.info('Starting scheduler')
         self.scheduler.start()
@@ -87,7 +87,7 @@ class System():
 
         for node_label in self.nodes:
             LOGGER.debug(f'stopping node {node_label}')
-            pub.sendMessage(f'system.node.{node_label}.stop')
+            pub.sendMessage(f'{node_label}.stop')
 
         LOGGER.info('Stopping scheduler')
         self.scheduler.shutdown()
@@ -162,7 +162,8 @@ class System():
 
         packages_path = os.path.join(LOCAL_DIR, 'packages')
         with os.scandir(path=packages_path) as packages:
-            for package in filter(lambda pkg: pkg.is_dir(), packages):
+            for package in filter(lambda pkg: pkg.is_dir() and not
+                                  pkg.name.startswith('__'), packages):
                 package_path = os.path.join(packages_path, package.name)
                 self.load_modules(package_path, package.name)
 
@@ -181,16 +182,14 @@ class System():
             with os.scandir(path=module_type_path) as modules:
                 for module_file in modules:
                     if module_file.name.endswith('.py') and not module_file.name.startswith('__'):
-                        module_name = f'{package_name}.{module_type}.{module_file.name[:-3]}'
+                        module_file_name = f'{module_file.name[:-3]}'
+                        module_name = f'{package_name}.{module_type}.{module_file_name}'
                         module = importlib.import_module(module_name, __package__)
 
                         if any(hasattr(module, class_name) for class_name in CLASS_NAME_CONSTS):
                             if package is not None:
-                                module_system_name = f'{package}.{module_file.name[:-3]}'
+                                module_system_name = f'{package}.{module_file_name}'
                             else:
-                                module_system_name = f'{module_file.name[:-3]}'
+                                module_system_name = module_file_name
+                            LOGGER.info(f'Loaded module {module_system_name}')
                             self.loaded_modules[module_type][module_system_name] = module
-
-if __name__ == '__main__':
-    SYSTEM = System()
-    SYSTEM.start()

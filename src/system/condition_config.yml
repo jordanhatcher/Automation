@@ -1,3 +1,2 @@
 pipe_conditions:
   schedule: '* * * * *'
-test_scheduled_condition:

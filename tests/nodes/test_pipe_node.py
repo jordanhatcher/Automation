@@ -10,8 +10,8 @@ import warnings
 import time
 
 from pubsub import pub
-from src.state import State
-from src.nodes.pipe_node import PipeNode
+from src.system.state import State
+from src.system.nodes.pipe_node import PipeNode
 
 logging.disable(logging.ERROR)
 
@@ -39,7 +39,7 @@ class TestPipeNode(unittest.TestCase):
         _state = State()
         _pipe_node = PipeNode('pipe_node', _state,
                               config={'pipe_path': '/tmp/automation.pipe'})
-        pub.sendMessage('system.node.pipe_node.start')
+        pub.sendMessage('pipe_node.start')
         time.sleep(1)
-        pub.sendMessage('system.node.pipe_node.stop')
+        pub.sendMessage('pipe_node.stop')
         _pipe_node.join()

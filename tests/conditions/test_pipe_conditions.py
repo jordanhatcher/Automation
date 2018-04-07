@@ -9,7 +9,7 @@ import unittest
 import warnings
 
 from pubsub import pub
-from src.conditions.pipe_conditions import PipeConditions
+from src.system.conditions.pipe_conditions import PipeConditions
 
 logging.disable(logging.ERROR)
 
