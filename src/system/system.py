@@ -179,17 +179,23 @@ class System():
 
         for module_type in MODULE_TYPES:
             module_type_path = os.path.join(package_path, module_type)
-            with os.scandir(path=module_type_path) as modules:
-                for module_file in modules:
-                    if module_file.name.endswith('.py') and not module_file.name.startswith('__'):
-                        module_file_name = f'{module_file.name[:-3]}'
-                        module_name = f'{package_name}.{module_type}.{module_file_name}'
-                        module = importlib.import_module(module_name, __package__)
 
-                        if any(hasattr(module, class_name) for class_name in CLASS_NAME_CONSTS):
-                            if package is not None:
-                                module_system_name = f'{package}.{module_file_name}'
-                            else:
-                                module_system_name = module_file_name
-                            LOGGER.info(f'Loaded module {module_system_name}')
-                            self.loaded_modules[module_type][module_system_name] = module
+            try:
+                with os.scandir(path=module_type_path) as modules:
+                    for module_file in modules:
+                        if (module_file.name.endswith('.py') and not
+                                module_file.name.startswith('__')):
+
+                            module_file_name = f'{module_file.name[:-3]}'
+                            module_name = f'{package_name}.{module_type}.{module_file_name}'
+                            module = importlib.import_module(module_name, __package__)
+
+                            if any(hasattr(module, class_name) for class_name in CLASS_NAME_CONSTS):
+                                if package is not None:
+                                    module_system_name = f'{package}.{module_file_name}'
+                                else:
+                                    module_system_name = module_file_name
+                                LOGGER.info(f'Loaded module {module_system_name}')
+                                self.loaded_modules[module_type][module_system_name] = module
+            except FileNotFoundError:
+                pass
