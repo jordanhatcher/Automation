@@ -18,6 +18,7 @@ logging.basicConfig(format=FORMAT, level=logging.INFO)
 
 LOGGER = logging.getLogger(__name__)
 LOCAL_DIR = os.path.dirname(__file__)
+CONFIG_DIR = os.path.join(LOCAL_DIR, 'config')
 
 MODULE_TYPES = ('conditions', 'nodes')
 CLASS_NAME_CONSTS = ('NODE_CLASS_NAME', 'CONDITION_CLASS_NAME')
@@ -110,7 +111,7 @@ class System():
         """
 
         self.nodes = {}
-        config_path = os.path.join(LOCAL_DIR, self.node_config_file)
+        config_path = os.path.join(CONFIG_DIR, self.node_config_file)
         with open(config_path, 'r') as node_config_file:
             try:
                 nodes = yaml.load(node_config_file)
@@ -133,7 +134,7 @@ class System():
         """
 
         self.conditions = {}
-        config_path = os.path.join(LOCAL_DIR, self.condition_config_file)
+        config_path = os.path.join(CONFIG_DIR, self.condition_config_file)
         with open(config_path, 'r') as condition_config_file:
             try:
                 conditions = yaml.load(condition_config_file)
