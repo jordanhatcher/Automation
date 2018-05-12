@@ -4,16 +4,25 @@ integration
 Integration test suite
 """
 
-import os
 import logging
 import time
 import threading
 import unittest
+from unittest.mock import patch, mock_open
 from src.system.system import System
 
 logging.disable(logging.ERROR)
 
-CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+MOCK_CONFIG = """
+nodes:
+  pipe_node:
+    node: pipe_node
+    config:
+      pipe_path: /tmp/automation.pipe
+
+conditions:
+  pipe_conditions:
+"""
 
 class TestIntegration(unittest.TestCase):
     """
@@ -25,17 +34,16 @@ class TestIntegration(unittest.TestCase):
         Checks that the node updates its state when started/stopped
         """
 
-        node_file_path = os.path.join(CURRENT_DIR, 'node_config.yml')
-        condition_file_path = os.path.join(CURRENT_DIR, 'condition_config.yml')
+        patcher = patch('builtins.open', new_callable=mock_open, read_data=MOCK_CONFIG)
+        patcher.start()
+        _system = System()
+        patcher.stop()
 
-        _system = System(node_file_path, condition_file_path)
         _system.start()
 
         time.sleep(5)
-
         with open('/tmp/automation.pipe', 'w') as pipe:
             pipe.write('stop')
-
         time.sleep(1)
 
         self.assertEqual(threading.active_count(), 1)

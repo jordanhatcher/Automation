@@ -13,9 +13,6 @@ from pytz import utc
 from pubsub import pub
 from .state import State
 
-FORMAT = '[%(asctime)s] %(levelname)s - %(name)s - %(message)s'
-logging.basicConfig(format=FORMAT, level=logging.INFO)
-
 LOGGER = logging.getLogger(__name__)
 LOCAL_DIR = os.path.dirname(__file__)
 CONFIG_DIR = os.path.join(LOCAL_DIR, 'config')
@@ -27,25 +24,20 @@ class System():
     """
     System
 
-
+    Main system class for the automation system. It loads all config, and keeps
+    references to nodes and conditions used by the system.
     """
 
-    def __init__(self, node_config_file=None, condition_config_file=None):
+    def __init__(self):
         """
         Constructor
         """
 
-        self.node_config_file = 'node_config.yml'
-        self.condition_config_file = 'condition_config.yml'
-
-        if node_config_file:
-            self.node_config_file = node_config_file
-
-        if condition_config_file:
-            self.condition_config_file = condition_config_file
+        self.system_config_file = 'config.yml'
 
         self.state = State()
         self.scheduler = BackgroundScheduler(timezone=utc)
+
         self.loaded_modules = {'nodes': {}, 'conditions': {}}
         self.nodes = {}
         self.conditions = {}
@@ -53,6 +45,7 @@ class System():
         self.load_modules(LOCAL_DIR)
         self.load_packages()
 
+        self.load_config()
         pub.subscribe(self.stop, 'system.stop')
         pub.subscribe(self.restart, 'system.restart')
 
@@ -64,9 +57,6 @@ class System():
         """
 
         LOGGER.info('Starting')
-        self.load_nodes()
-        self.load_conditions()
-
         LOGGER.debug(f'System nodes: {self.nodes}')
         LOGGER.debug(f'System conditions: {self.conditions}')
 
@@ -105,56 +95,71 @@ class System():
         self.start()
         LOGGER.info('Restarted')
 
-    def load_nodes(self):
+    def load_config(self):
         """
-        Loads nodes based on configuration in 'node_config.yml
+        Loads the 'config.yml' file
+        """
+
+        config_path = os.path.join(CONFIG_DIR, self.system_config_file)
+        with open(config_path, 'r') as system_config_file:
+            try:
+                config = yaml.load(system_config_file)
+
+                if 'system' in config:
+                    self.load_system_config(config['system'])
+
+                if 'nodes' in config:
+                    self.load_nodes_config(config['nodes'])
+
+                if 'conditions' in config:
+                    self.load_conditions_config(config['conditions'])
+
+            except yaml.YAMLError as error:
+                error_msg = f'Unable to read config.yml: {error}'
+                raise Exception(error_msg)
+
+    def load_system_config(self, system_config):
+        """
+        Handles any system configuration in the config file
+
+        """
+
+        pass
+
+    def load_nodes_config(self, nodes):
+        """
+        Loads nodes based on configuration in the config file
         """
 
         self.nodes = {}
-        config_path = os.path.join(CONFIG_DIR, self.node_config_file)
-        with open(config_path, 'r') as node_config_file:
-            try:
-                nodes = yaml.load(node_config_file)
-                for label, node_contents in nodes.items():
-                    LOGGER.debug(f'Loading node {label}')
-                    node_name = node_contents['node']
-                    node_module = self.loaded_modules['nodes'][node_name]
-                    node_class = getattr(node_module, node_module.NODE_CLASS_NAME)
-                    node_config = node_contents['config'] if 'config' in node_contents else None
-                    new_node = node_class(label, self.state, node_config)
-                    self.nodes[label] = new_node
-            except yaml.YAMLError as error:
-                error_msg = f'Unable to read node_config.yml: {error}'
-                LOGGER.error(error_msg)
-                raise Exception(error_msg)
+        for label, node_contents in nodes.items():
+            LOGGER.debug(f'Loading node {label}')
+            node_name = node_contents['node']
+            node_module = self.loaded_modules['nodes'][node_name]
+            node_class = getattr(node_module, node_module.NODE_CLASS_NAME)
+            node_config = node_contents['config'] if 'config' in node_contents else None
+            new_node = node_class(label, self.state, node_config)
+            self.nodes[label] = new_node
 
-    def load_conditions(self):
+    def load_conditions_config(self, conditions):
         """
-        Loads conditions based on configuration in 'condition_config.yml'
+        Loads conditions based on configuration in the config file
         """
 
         self.conditions = {}
-        config_path = os.path.join(CONFIG_DIR, self.condition_config_file)
-        with open(config_path, 'r') as condition_config_file:
-            try:
-                conditions = yaml.load(condition_config_file)
-                for condition_name, condition_config in conditions.items():
-                    schedule = None
+        for condition_name, condition_config in conditions.items():
+            schedule = None
 
-                    if condition_config is not None:
-                        if 'schedule' in condition_config:
-                            schedule = condition_config['schedule']
+            if condition_config is not None:
+                if 'schedule' in condition_config:
+                    schedule = condition_config['schedule']
 
-                    LOGGER.debug(f'Loading condition {condition_name}')
-                    condition_module = self.loaded_modules['conditions'][condition_name]
-                    condition_class = getattr(condition_module,
-                                              condition_module.CONDITION_CLASS_NAME)
-                    new_condition = condition_class(self.scheduler, schedule)
-                    self.conditions[condition_name] = new_condition
-            except yaml.YAMLError as error:
-                error_msg = f'Unable to read condition_config.yml: {error}'
-                LOGGER.error(error_msg)
-                raise Exception(error_msg)
+            LOGGER.debug(f'Loading condition {condition_name}')
+            condition_module = self.loaded_modules['conditions'][condition_name]
+            condition_class = getattr(condition_module,
+                                      condition_module.CONDITION_CLASS_NAME)
+            new_condition = condition_class(self.scheduler, schedule)
+            self.conditions[condition_name] = new_condition
 
     def load_packages(self):
         """

@@ -1,0 +1,10 @@
+system:
+
+nodes:
+  pipe_node:
+    node: pipe_node
+    config:
+      pipe_path: /var/automation/automation.pipe
+
+conditions:
+  pipe_conditions:

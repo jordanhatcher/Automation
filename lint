@@ -1,2 +1,2 @@
 #!/bin/bash
-find . -iname "*.py" | xargs pylint
+find . -name "*.py" -not -path "./src/system/packages/*" | xargs pylint
