@@ -31,7 +31,7 @@ class State:
         Adds a new node label to the state dictionary.
         """
 
-        LOGGER.debug('Added node: %s', node_label)
+        LOGGER.debug(f'Added node: {node_label}')
         self.state_dict[node_label] = {}
 
     def add_states(self, node_label, keys):
@@ -39,7 +39,7 @@ class State:
         Helper function to add new state keys for a node label.
         """
 
-        LOGGER.debug('Added states: %s', keys)
+        LOGGER.debug(f'Added states: {keys}')
         for key in keys:
             self.state_dict[node_label][key] = None
 
@@ -50,14 +50,14 @@ class State:
         values that are updated to activate conditions listening to the state.
         """
 
-        LOGGER.debug('Updating states: %s', states)
+        LOGGER.debug(f'Updating states: {states}')
         for key in states:
             value = states[key]
             previous_value = self.state_dict[node_label][key]
 
             if not value == previous_value:
-                LOGGER.debug('Creating state change event for %s', key)
+                LOGGER.debug(f'Creating state change event for {key}')
                 self.state_dict[node_label][key] = value
-                topic = 'state.{}.{}'.format(node_label, key)
+                topic = f'state.{node_label}.{key}'
                 message = {'previous_value': previous_value, 'value': value}
                 pub.sendMessage(topic, msg=message)

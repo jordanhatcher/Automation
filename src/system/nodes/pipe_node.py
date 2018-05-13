@@ -36,14 +36,14 @@ class PipeNode(Node, threading.Thread):
         pub.subscribe(self.stop, f'{self.label}.stop')
         pub.subscribe(self.start, f'{self.label}.start')
 
-        LOGGER.debug('Initialized %s', self.label)
+        LOGGER.debug(f'Initialized {self.label}')
 
     def update_state(self):
         """
         Gets the state of the node.
         """
 
-        LOGGER.info('Updating state %s', self.label)
+        LOGGER.info(f'Updating state {self.label}')
         state = {'running': not self.running_event.is_set()}
         self.state.update_states(self.label, **state)
 
@@ -52,20 +52,20 @@ class PipeNode(Node, threading.Thread):
         Stops the node
         """
 
-        LOGGER.info('Stopping %s', self.label)
+        LOGGER.info(f'Stopping {self.label}')
         self.running_event.set()
         with open(self.config['pipe_path'], 'w') as pipe:
             pipe.write(' ') # write whitespace to the pipe to unblock the open call in run()
 
         self.update_state()
-        LOGGER.info('Stopped %s', self.label)
+        LOGGER.info(f'Stopped {self.label}')
 
     def run(self):
         """
         Run loop
         """
 
-        LOGGER.info('Started %s', self.label)
+        LOGGER.info(f'Started {self.label}')
 
         pipe_path = self.config['pipe_path']
         if not os.path.exists(pipe_path):
@@ -84,6 +84,6 @@ class PipeNode(Node, threading.Thread):
 
                     LOGGER.info('Received input')
                     LOGGER.debug('Input: %s', line)
-                    pub.sendMessage('messages.{}'.format(self.label), msg={
+                    pub.sendMessage(f'messages.{self.label}', msg={
                         'content': line
                     })

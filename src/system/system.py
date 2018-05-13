@@ -137,7 +137,7 @@ class System():
             node_name = node_contents['node']
             node_module = self.loaded_modules['nodes'][node_name]
             node_class = getattr(node_module, node_module.NODE_CLASS_NAME)
-            node_config = node_contents['config'] if 'config' in node_contents else None
+            node_config = node_contents.get('config')
             new_node = node_class(label, self.state, node_config)
             self.nodes[label] = new_node
 
@@ -148,11 +148,10 @@ class System():
 
         self.conditions = {}
         for condition_name, condition_config in conditions.items():
-            schedule = None
 
+            schedule = None
             if condition_config is not None:
-                if 'schedule' in condition_config:
-                    schedule = condition_config['schedule']
+                schedule = condition_config.get('schedule')
 
             LOGGER.debug(f'Loading condition {condition_name}')
             condition_module = self.loaded_modules['conditions'][condition_name]
