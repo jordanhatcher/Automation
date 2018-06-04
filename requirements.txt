@@ -2,3 +2,4 @@ APScheduler==3.5.1
 Pypubsub==4.0.0
 PyYAML==3.12
 tzlocal==1.5.1
+influxdb==5.0.0

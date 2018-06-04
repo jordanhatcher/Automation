@@ -31,7 +31,6 @@ class PipeNode(Node, threading.Thread):
         threading.Thread.__init__(self)
 
         self.running_event = threading.Event()
-        self.state.add_states(self.label, ['running'])
 
         pub.subscribe(self.stop, f'{self.label}.stop')
         pub.subscribe(self.start, f'{self.label}.start')
@@ -45,7 +44,7 @@ class PipeNode(Node, threading.Thread):
 
         LOGGER.info(f'Updating state {self.label}')
         state = {'running': not self.running_event.is_set()}
-        self.state.update_states(self.label, **state)
+        self.state.update_state(self.label, state)
 
     def stop(self):
         """
@@ -83,7 +82,7 @@ class PipeNode(Node, threading.Thread):
                         break
 
                     LOGGER.info('Received input')
-                    LOGGER.debug('Input: %s', line)
+                    LOGGER.debug(f'Input: {line}')
                     pub.sendMessage(f'messages.{self.label}', msg={
                         'content': line
                     })

@@ -32,11 +32,16 @@ class TestState(unittest.TestCase):
             self.assertEqual(msg['value'], 'initial_value')
             self.assertEqual(msg['previous_value'], None)
 
-        _state = State()
-        _state.add_node('test_node_label')
-        _state.add_states('test_node_label', ['test_state_key'])
+        _state = State({
+            'host': 'localhost',
+            'port': 8086,
+            'user': 'test',
+            'pass': 'test',
+            'db_name': 'test'
+        })
+
         pub.subscribe(test_listener, 'state.test_node_label')
-        _state.update_states('test_node_label', **{'test_state_key': 'initial_value'})
+        _state.update_state('test_node_label', {'test_state_key': 'initial_value'})
 
 if __name__ == '__main__':
     SUITE = unittest.TestLoader().loadTestsFromTestCase(TestState)

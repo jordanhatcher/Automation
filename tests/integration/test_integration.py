@@ -14,6 +14,12 @@ from src.system.system import System
 logging.disable(logging.ERROR)
 
 MOCK_CONFIG = """
+system:
+  influxdb:
+    host: localhost
+    port: 8086
+    db_name: test
+
 nodes:
   pipe_node:
     node: pipe_node

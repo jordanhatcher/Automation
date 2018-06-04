@@ -15,6 +15,14 @@ from src.system.nodes.pipe_node import PipeNode
 
 logging.disable(logging.ERROR)
 
+SETTINGS = {
+    'host': 'localhost',
+    'port': 8086,
+    'user': 'test',
+    'pass': 'test',
+    'db_name': 'test'
+}
+
 class TestPipeNode(unittest.TestCase):
     """
     Test case class
@@ -36,7 +44,7 @@ class TestPipeNode(unittest.TestCase):
         pub.subscribe(test_listener, 'state.pipe_node')
         pub.subscribe(test_listener, 'messages.pipe_node')
 
-        _state = State()
+        _state = State(SETTINGS)
         _pipe_node = PipeNode('pipe_node', _state,
                               config={'pipe_path': '/tmp/automation.pipe'})
         pub.sendMessage('pipe_node.start')

@@ -33,11 +33,6 @@ class System():
         Constructor
         """
 
-        self.system_config_file = 'config.yml'
-
-        self.state = State()
-        self.scheduler = BackgroundScheduler(timezone=utc)
-
         self.loaded_modules = {'nodes': {}, 'conditions': {}}
         self.nodes = {}
         self.conditions = {}
@@ -45,7 +40,19 @@ class System():
         self.load_modules(LOCAL_DIR)
         self.load_packages()
 
+        self.system_config_file = 'config.yml'
+        self.system_config = None
+        self.node_config = None
+        self.condition_config = None
+
         self.load_config()
+
+        self.state = State(self.system_config.get('influxdb', {}))
+        self.scheduler = BackgroundScheduler(timezone=utc)
+
+        self.load_nodes()
+        self.load_conditions()
+
         pub.subscribe(self.stop, 'system.stop')
         pub.subscribe(self.restart, 'system.restart')
 
@@ -105,34 +112,21 @@ class System():
             try:
                 config = yaml.load(system_config_file)
 
-                if 'system' in config:
-                    self.load_system_config(config['system'])
-
-                if 'nodes' in config:
-                    self.load_nodes_config(config['nodes'])
-
-                if 'conditions' in config:
-                    self.load_conditions_config(config['conditions'])
+                self.system_config = config.get('system', {})
+                self.node_config = config.get('nodes', {})
+                self.condition_config = config.get('conditions', {})
 
             except yaml.YAMLError as error:
                 error_msg = f'Unable to read config.yml: {error}'
                 raise Exception(error_msg)
 
-    def load_system_config(self, system_config):
-        """
-        Handles any system configuration in the config file
-
-        """
-
-        pass
-
-    def load_nodes_config(self, nodes):
+    def load_nodes(self):
         """
         Loads nodes based on configuration in the config file
         """
 
         self.nodes = {}
-        for label, node_contents in nodes.items():
+        for label, node_contents in self.node_config.items():
             LOGGER.debug(f'Loading node {label}')
             node_name = node_contents['node']
             node_module = self.loaded_modules['nodes'][node_name]
@@ -141,17 +135,17 @@ class System():
             new_node = node_class(label, self.state, node_config)
             self.nodes[label] = new_node
 
-    def load_conditions_config(self, conditions):
+    def load_conditions(self):
         """
         Loads conditions based on configuration in the config file
         """
 
         self.conditions = {}
-        for condition_name, condition_config in conditions.items():
+        for condition_name, config in self.condition_config.items():
 
             schedule = None
-            if condition_config is not None:
-                schedule = condition_config.get('schedule')
+            if config is not None:
+                schedule = config.get('schedule')
 
             LOGGER.debug(f'Loading condition {condition_name}')
             condition_module = self.loaded_modules['conditions'][condition_name]
