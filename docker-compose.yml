@@ -1,0 +1,23 @@
+version: '2.1'
+
+services:
+  automation:
+    image: automation
+    volumes:
+      - /var/automation/config:/src/system/config
+      - /var/automation/packages:/src/system/packages
+    depends_on:
+      influxdb:
+        condition: service_healthy
+
+  influxdb:
+    image: influxdb
+    ports:
+      - '8086:8086'
+    volumes:
+      - /var/influxdb:/var/lib/influxdb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

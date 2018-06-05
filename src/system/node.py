@@ -20,15 +20,6 @@ class Node():
         self.state = state
         self.config = config
 
-        self._add_node_to_state()
-
-    def _add_node_to_state(self):
-        """
-        Adds the node label to the system state.
-        """
-
-        self.state.add_node(self.label)
-
     def update_state(self):
         """
         Updates the state, with the node's current state
