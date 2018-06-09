@@ -1,4 +1,10 @@
 system:
+  influxdb:
+    host: influxdb
+    port: 8086
+    user: automation
+    pass: <USER_PASS>
+    db_name: automation
 
 nodes:
   pipe_node:
