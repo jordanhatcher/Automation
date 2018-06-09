@@ -12,10 +12,16 @@ services:
 
   influxdb:
     image: influxdb
+    environment:
+      - 'INFLUXDB_DB=automation'
+      - 'INFLUXDB_ADMIN_USER=admin'
+      - 'INFLUXDB_ADMIN_PASSWORD=<ADMIN_PASSWORD>'
+      - 'INFLUXDB_USER=automation'
+      - 'INFLUXDB_USER_PASSWORD=<USER_PASSWORD>'
     ports:
       - '8086:8086'
     volumes:
-      - /var/influxdb:/var/lib/influxdb
+      - influxdb
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
       interval: 5s
@@ -25,5 +31,10 @@ services:
   #Optional service for grafana
   grafana:
     image: grafana/grafana
+    environment:
+      - 'GF_SECURITY_ADMIN_USER=admin'
+      - 'GF_SECURITY_ADMIN_PASSWORD=<ADMIN_PASSWORD>'
     ports:
       - '3000:3000'
+    volumes:
+      - grafana
