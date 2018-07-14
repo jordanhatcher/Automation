@@ -6,9 +6,6 @@ services:
     volumes:
       - /var/automation/config:/src/system/config
       - /var/automation/packages:/src/system/packages
-    depends_on:
-      influxdb:
-        condition: service_healthy
 
   influxdb:
     image: influxdb
@@ -22,11 +19,6 @@ services:
       - '8086:8086'
     volumes:
       - influxdb
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8086/ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
 
   #Optional service for grafana
   grafana:
