@@ -32,7 +32,6 @@ class State:
                                      settings.get('user'),
                                      settings.get('pass'),
                                      settings.get('db_name'))
-        self.client.create_database(settings.get('db_name'))
         LOGGER.debug('Initialized State')
 
     def update_state(self, node_label, values):
