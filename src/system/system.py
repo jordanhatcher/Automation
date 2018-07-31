@@ -151,7 +151,12 @@ class System():
             condition_module = self.loaded_modules['conditions'][condition_name]
             condition_class = getattr(condition_module,
                                       condition_module.CONDITION_CLASS_NAME)
-            new_condition = condition_class(self.scheduler, schedule)
+
+            if schedule is not None:
+                new_condition = condition_class(self.scheduler, schedule)
+            else:
+                new_condition = condition_class(self.scheduler)
+
             self.conditions[condition_name] = new_condition
 
     def load_packages(self):
