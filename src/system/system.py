@@ -42,10 +42,12 @@ class System():
 
         self.system_config_file = 'config.yml'
         self.system_config = None
+        self.packages_config = None
         self.node_config = None
         self.condition_config = None
 
         self.load_config()
+        self.install_packages()
 
         self.state = State(self.system_config.get('influxdb', {}))
         self.scheduler = BackgroundScheduler(timezone=utc)
@@ -113,12 +115,21 @@ class System():
                 config = yaml.load(system_config_file)
 
                 self.system_config = config.get('system', {})
+                self.package_config = config.get('packages', [])
                 self.node_config = config.get('nodes', {})
                 self.condition_config = config.get('conditions', {})
 
             except yaml.YAMLError as error:
                 error_msg = f'Unable to read config.yml: {error}'
                 raise Exception(error_msg)
+
+    def install_packages(self):
+        """
+        Helper function to use git to install the packages specified in config.yml
+        """
+
+        for package in self.package_config:
+            os.system(f'cd packages && git clone {package} &2>/dev/null || git pull')
 
     def load_nodes(self):
         """

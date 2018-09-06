@@ -6,6 +6,11 @@ system:
     pass: <USER_PASS>
     db_name: automation
 
+packages:
+  - https://github.com/jordanhatcher/weather.git
+  - https://github.com/jordanhatcher/email_sms.git
+  - https://github.com/jordanhatcher/led_strip.git
+
 nodes:
   pipe_node:
     node: pipe_node
