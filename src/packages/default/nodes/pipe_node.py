@@ -4,9 +4,9 @@ pipe_node
 This module contains the PipeNode class
 """
 
+import asyncio
 import logging
 import os
-import threading
 from pubsub import pub
 from node import Node
 
@@ -14,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 NODE_CLASS_NAME = 'PipeNode'
 
-class PipeNode(Node, threading.Thread):
+class PipeNode(Node):
     """
     PipeNode
 
@@ -28,14 +28,13 @@ class PipeNode(Node, threading.Thread):
         """
 
         Node.__init__(self, label, state, config)
-        threading.Thread.__init__(self)
 
-        self.running_event = threading.Event()
+        socket_file = config['socket_path']
 
-        pub.subscribe(self.stop, f'{self.label}.stop')
-        pub.subscribe(self.start, f'{self.label}.start')
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.start_unix_server(self.handler, path=socket_file))
 
-        LOGGER.debug(f'Initialized {self.label}')
+        LOGGER.info(f'Initialized {self.label}, starting unix server')
 
     def update_state(self):
         """
@@ -43,46 +42,18 @@ class PipeNode(Node, threading.Thread):
         """
 
         LOGGER.info(f'Updating state {self.label}')
-        state = {'running': not self.running_event.is_set()}
         self.state.update_state(self.label, state)
 
-    def stop(self):
-        """
-        Stops the node
-        """
-
-        LOGGER.info(f'Stopping {self.label}')
-        self.running_event.set()
-        with open(self.config['pipe_path'], 'w') as pipe:
-            pipe.write(' ') # write whitespace to the pipe to unblock the open call in run()
-
-        self.update_state()
-        LOGGER.info(f'Stopped {self.label}')
-
-    def run(self):
+    async def handler(self, reader, writer):
         """
         Run loop
         """
 
-        LOGGER.info(f'Started {self.label}')
+        LOGGER.info('Received unix socket input')
 
-        pipe_path = self.config['pipe_path']
-        if not os.path.exists(pipe_path):
-            os.makedirs(os.path.dirname(pipe_path), exist_ok=True)
-            os.mkfifo(pipe_path)
-
-        self.running_event.clear()
-        self.update_state()
-
-        while not self.running_event.is_set():
-            with open(pipe_path, 'r') as pipe:
-                while True:
-                    line = pipe.read()
-                    if not line:
-                        break
-
-                    LOGGER.info('Received input')
-                    LOGGER.debug(f'Input: {line}')
-                    pub.sendMessage(f'messages.{self.label}', msg={
-                        'content': line
-                    })
+        data = await reader.read(1000)
+        message = data.decode()
+        LOGGER.debug(f'Received: {message}')
+        pub.sendMessage(f'messages.{self.label}', msg={
+            'content': message
+        })

@@ -10,7 +10,7 @@ nodes:
   pipe_node:
     node_type: default.pipe_node
     config:
-      pipe_path: /var/automation/automation.pipe
+      socket_path: /var/automation/automation.sock
 
 conditions:
   pipe_conditions:

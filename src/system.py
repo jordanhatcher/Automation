@@ -48,12 +48,6 @@ conditions = init_conditions(condition_config, scheduler, loaded_modules)
 # Start the system
 try:
     scheduler.start()
-
-    for node in nodes:
-        task = node.get_task()
-        if task: # only add nodes that have tasks to the event loop
-            event_loop.add_task(task)
-
     event_loop.run_forever()
 except:
     LOGGER.info('Exiting')
