@@ -8,7 +8,7 @@ system:
 
 nodes:
   pipe_node:
-    node: pipe_node
+    node_type: default.pipe_node
     config:
       pipe_path: /var/automation/automation.pipe
 

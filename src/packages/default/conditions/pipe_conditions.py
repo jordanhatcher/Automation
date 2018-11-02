@@ -5,7 +5,7 @@ pipe_conditions
 
 import logging
 from pubsub import pub
-from ..condition import Condition
+from condition import Condition
 
 LOGGER = logging.getLogger(__name__)
 
