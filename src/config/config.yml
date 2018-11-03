@@ -7,8 +7,8 @@ system:
     db_name: automation
 
 nodes:
-  pipe_node:
-    node_type: default.pipe_node
+  unix_socket_node:
+    node_type: default.unix_socket_server
     config:
       socket_path: /var/automation/automation.sock
 

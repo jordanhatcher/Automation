@@ -1,7 +1,7 @@
 """
-pipe_node
+unix_server
 
-This module contains the PipeNode class
+This module contains the UnixServerNode class
 """
 
 import asyncio
@@ -12,13 +12,13 @@ from node import Node
 
 LOGGER = logging.getLogger(__name__)
 
-NODE_CLASS_NAME = 'PipeNode'
+NODE_CLASS_NAME = 'UnixServerNode'
 
-class PipeNode(Node):
+class UnixServerNode(Node):
     """
-    PipeNode
+    UnixServerNode
 
-    Creates a named pipe that can be used to send basic commands to the
+    Creates a unix socket that can be used to send basic commands to the
     automation system.
     """
 
