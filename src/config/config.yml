@@ -8,9 +8,9 @@ system:
 
 nodes:
   unix_socket_node:
-    node_type: default.unix_socket_server
+    node_type: default.unix_server
     config:
       socket_path: /var/automation/automation.sock
 
 conditions:
-  pipe_conditions:
+  unix_server_conditions:

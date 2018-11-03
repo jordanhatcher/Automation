@@ -12,7 +12,6 @@ def init_conditions(condition_config, scheduler, loaded_modules):
 
     conditions = {}
     for condition_name, config in condition_config.items():
-
         schedule = None
         if config is not None:
             schedule = config.get('schedule')

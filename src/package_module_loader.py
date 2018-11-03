@@ -82,5 +82,5 @@ def _import_module(module_file, module_type, full_package_name):
     module = importlib.import_module(module_name, package=full_package_name)
 
     if any(hasattr(module, class_name) for class_name in CLASS_NAME_CONSTS):
-        LOGGER.info(f'Imported module {full_package_name}')
+        LOGGER.info(f'Imported module {module_name}')
         return module, module_file_name

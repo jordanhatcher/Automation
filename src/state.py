@@ -7,6 +7,7 @@ The state module contains the State class.
 import logging
 from influxdb import InfluxDBClient
 from pubsub import pub
+from requests.exceptions import ConnectionError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class State:
         """
 
         self.state_cache = {}
+        self.db_disabled = False
         self.settings = settings
         #TODO support all InfluxDBClient settings
         self.client = InfluxDBClient(settings.get('host'),
@@ -32,7 +34,7 @@ class State:
                                      settings.get('user'),
                                      settings.get('pass'),
                                      settings.get('db_name'))
-        LOGGER.debug('Initialized State')
+        LOGGER.info('Initialized State')
 
     def update_state(self, node_label, values):
         """
@@ -73,4 +75,11 @@ class State:
 
             pub.sendMessage(f'state.{node_label}.{key}', msg=message)
 
-        self.client.write_points(points)
+        if not self.db_disabled: # TODO re-enable db after a time period
+            try:
+                self.client.write_points(points)
+            except ConnectionError:
+                self.db_disabled = True
+                LOGGER.warning('Unable to write state to influxdb. The database will be disabled, but state will be written to local cache.')
+        else:
+            LOGGER.warning('The database connection is disabled. Writting state to local cache.')
