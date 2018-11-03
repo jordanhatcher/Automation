@@ -1,21 +1,22 @@
 """
-pipe_conditions
+unix_server_conditions
 
 """
 
 import logging
 from pubsub import pub
-from ..condition import Condition
+from condition import Condition
 
 LOGGER = logging.getLogger(__name__)
 
-CONDITION_CLASS_NAME = 'PipeConditions'
+CONDITION_CLASS_NAME = 'UnixServerConditions'
 
-class PipeConditions(Condition):
+class UnixServerConditions(Condition):
     """
-    PipeConditions
+    UnixServerConditions
 
-    Conditions for reading from named pipes
+    Conditions for handling messages sent to the UnixSocketServer
+    node
     """
 
     def __init__(self, scheduler, schedule=None):
@@ -24,7 +25,7 @@ class PipeConditions(Condition):
         """
 
         Condition.__init__(self, scheduler, schedule)
-        pub.subscribe(self.evaluate, 'messages.pipe_node')
+        pub.subscribe(self.evaluate, 'messages.unix_socket_node')
         LOGGER.debug('Initialized')
 
     def evaluate(self, msg):
@@ -33,6 +34,7 @@ class PipeConditions(Condition):
         """
 
         LOGGER.info('Evaluating')
+        print(msg)
 
         if 'stop' in msg['content']:
             pub.sendMessage('system.stop')

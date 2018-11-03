@@ -7,10 +7,10 @@ system:
     db_name: automation
 
 nodes:
-  pipe_node:
-    node: pipe_node
+  unix_socket_node:
+    node_type: default.unix_server
     config:
-      pipe_path: /var/automation/automation.pipe
+      socket_path: /var/automation/automation.sock
 
 conditions:
-  pipe_conditions:
+  unix_server_conditions:

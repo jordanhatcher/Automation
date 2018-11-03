@@ -1,8 +1,8 @@
 #!/bin/sh
 
 echo "########## Installing requirements from packages ##########"
-cd system/packages
-find -name "requirements.txt" | xargs -I{} pip3 install -r {}
-cd ../../
+cd packages
+find -name "requirements.txt" | xargs -I{} pip3 install -r {} --user
+cd ../
 echo "##########   Finished installing requirements    ##########"
-python3 main.py
+python3 system.py
