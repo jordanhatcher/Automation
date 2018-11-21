@@ -34,7 +34,6 @@ class UnixServerConditions(Condition):
         """
 
         LOGGER.info('Evaluating')
-        print(msg)
 
-        if 'stop' in msg['content']:
+        if 'stop' == msg['content']:
             pub.sendMessage('system.stop')

@@ -31,7 +31,7 @@ system_config, node_config, condition_config = load_config(CONFIG_DIR)
 
 # Set up logging
 log_level = logging.getLevelName(system_config.get('log_level', 'INFO').upper())
-logging.basicConfig(format=LOG_FORMAT, level=logging.INFO)
+logging.basicConfig(format=LOG_FORMAT, level=log_level)
 
 # initialize state, event loops, scheduler, etc
 state = State(system_config.get('influxdb', {}))
