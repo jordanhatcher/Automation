@@ -9,7 +9,7 @@ import logging
 import os
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from pytz import utc
+from pytz import timezone
 from pubsub import pub
 
 from state import State
@@ -33,10 +33,14 @@ system_config, node_config, condition_config = load_config(CONFIG_DIR)
 log_level = logging.getLevelName(system_config.get('log_level', 'INFO').upper())
 logging.basicConfig(format=LOG_FORMAT, level=log_level)
 
+# Set up timezone
+time_zone = timezone(system_config.get('time_zone', 'UTC'))
+LOGGER.info(f'Using timezone: {time_zone.zone}')
+
 # initialize state, event loops, scheduler, etc
 state = State(system_config.get('influxdb', {}))
 event_loop = asyncio.get_event_loop()
-scheduler = AsyncIOScheduler(timezone=utc)
+scheduler = AsyncIOScheduler(timezone=time_zone)
 
 # Pre-load modules
 loaded_modules = load_package_modules(LOCAL_DIR)

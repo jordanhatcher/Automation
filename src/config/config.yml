@@ -5,6 +5,8 @@ system:
     user: automation
     pass: <USER_PASS>
     db_name: automation
+  log_level: INFO
+  time_zone: US/Eastern
 
 nodes:
   unix_socket_node:
