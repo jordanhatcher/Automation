@@ -7,6 +7,7 @@ import yaml
 
 CONFIG_FILE_NAME = 'config.yml'
 
+
 def load_config(config_dir):
     """
     Loads the 'config.yml' file

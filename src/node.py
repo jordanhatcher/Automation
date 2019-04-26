@@ -4,6 +4,7 @@ node
 Contains the Node class.
 """
 
+
 class Node():
     """
     Node
