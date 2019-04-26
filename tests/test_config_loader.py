@@ -1,8 +1,9 @@
-import sys, os
-sys.path.append(os.path.join(sys.path[0], '../src'))
-
+import os
+import sys
 import unittest
 from unittest.mock import patch, mock_open
+sys.path.append(os.path.join(sys.path[0], '../src'))
+
 import config_loader as cl
 
 
@@ -40,7 +41,7 @@ class TestConfigLoader(unittest.TestCase):
             'unix_server_conditions': None
         }
 
-        with patch("builtins.open", mock_open(read_data=config_file_contents)) as mock_file:
+        with patch("builtins.open", mock_open(read_data=config_file_contents)):
             system_config, node_config, condition_config = cl.load_config('/tmp/')
 
         self.assertDictEqual(expected_system_config, system_config)
@@ -67,7 +68,7 @@ class TestConfigLoader(unittest.TestCase):
             'unix_server_conditions': None
         }
 
-        with patch("builtins.open", mock_open(read_data=config_file_contents)) as mock_file:
+        with patch("builtins.open", mock_open(read_data=config_file_contents)):
             system_config, node_config, condition_config = cl.load_config('/tmp/')
 
         self.assertDictEqual(expected_system_config, system_config)
@@ -102,7 +103,7 @@ class TestConfigLoader(unittest.TestCase):
 
         expected_condition_config = {}
 
-        with patch("builtins.open", mock_open(read_data=config_file_contents)) as mock_file:
+        with patch("builtins.open", mock_open(read_data=config_file_contents)):
             system_config, node_config, condition_config = cl.load_config('/tmp/')
 
         self.assertDictEqual(expected_system_config, system_config)
@@ -132,7 +133,7 @@ class TestConfigLoader(unittest.TestCase):
 
         expected_condition_config = {}
 
-        with patch("builtins.open", mock_open(read_data=config_file_contents)) as mock_file:
+        with patch("builtins.open", mock_open(read_data=config_file_contents)):
             system_config, node_config, condition_config = cl.load_config('/tmp/')
 
         self.assertDictEqual(expected_system_config, system_config)

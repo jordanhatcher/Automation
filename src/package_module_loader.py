@@ -10,6 +10,7 @@ LOGGER = logging.getLogger(__name__)
 MODULE_TYPES = ('conditions', 'nodes')
 CLASS_NAME_CONSTS = ('NODE_CLASS_NAME', 'CONDITION_CLASS_NAME')
 
+
 def load_package_modules(local_directory):
     """
     Loads all modules for the packages
@@ -18,6 +19,7 @@ def load_package_modules(local_directory):
     packages = _load_packages(local_directory)
     return _import_modules(packages)
 
+
 def _is_package_dir(path):
     """
     Checks if path is a package directory
@@ -25,12 +27,14 @@ def _is_package_dir(path):
 
     return path.is_dir() and not path.name.startswith('__')
 
+
 def _is_python_module(_file):
     """
     Checks if a file is a python file
     """
 
     return _file.name.endswith('.py') and not _file.name.startswith('__')
+
 
 def _load_packages(local_directory):
     """
@@ -44,6 +48,7 @@ def _load_packages(local_directory):
             package_path = os.path.join(packages_path, package.name)
             packages.append((package_path, package.name))
     return packages
+
 
 def _import_modules(packages):
     """
@@ -60,17 +65,20 @@ def _import_modules(packages):
 
             try:
                 with os.scandir(path=module_type_path) as module_files:
-                    for module_file in module_files:
-                        if _is_python_module(module_file):
-                            module, module_name = _import_module(module_file, module_type, full_package_name)
-                            if module_type == 'nodes':
-                                modules.setdefault(f'{package_name}.{module_name}', module)
-                            else:
-                                modules.setdefault(module_name, module)
+                    for module_file in filter(_is_python_module, module_files):
+                        module, module_name = _import_module(module_file,
+                                                             module_type,
+                                                             full_package_name)
+                        if module_type == 'nodes':
+                            modules.setdefault(f'{package_name}.{module_name}',
+                                               module)
+                        else:
+                            modules.setdefault(module_name, module)
 
             except FileNotFoundError:
                 pass
     return modules
+
 
 def _import_module(module_file, module_type, full_package_name):
     """
@@ -84,3 +92,4 @@ def _import_module(module_file, module_type, full_package_name):
     if any(hasattr(module, class_name) for class_name in CLASS_NAME_CONSTS):
         LOGGER.info(f'Imported module {module_name}')
         return module, module_file_name
+    return None

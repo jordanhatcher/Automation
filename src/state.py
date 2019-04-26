@@ -11,6 +11,7 @@ from requests.exceptions import ConnectionError
 
 LOGGER = logging.getLogger(__name__)
 
+
 class State:
     """
     State
@@ -28,20 +29,22 @@ class State:
         self.state_cache = {}
         self.db_disabled = False
         self.settings = settings
-        #TODO support all InfluxDBClient settings
-        self.client = InfluxDBClient(settings.get('host'),
-                                     settings.get('port'),
-                                     settings.get('user'),
-                                     settings.get('pass'),
-                                     settings.get('db_name'))
+
+        # TODO support all InfluxDBClient settings
+        if settings is not None:
+            self.client = InfluxDBClient(settings.get('host'),
+                                         settings.get('port'),
+                                         settings.get('user'),
+                                         settings.get('pass'),
+                                         settings.get('db_name'))
         LOGGER.info('Initialized State')
 
     def update_state(self, node_label, values):
         """
         Updates the state of a node. values should be a dict of key-value pairs
-        to update the state of the node with. The latest values cached in a dict
-        to avoid database calls when getting the most up-to-date values for a
-        node's state. A message is published to the topic
+        to update the state of the node with. The latest values cached in a
+        dict to avoid database calls when getting the most up-to-date values
+        for a node's state. A message is published to the topic
         'state.<node_label>.<key>' for the values that are updated to activate
         conditions listening to the state.
         """
@@ -75,11 +78,14 @@ class State:
 
             pub.sendMessage(f'state.{node_label}.{key}', msg=message)
 
-        if not self.db_disabled: # TODO re-enable db after a time period
+        if not self.db_disabled:  # TODO re-enable db after a time period
             try:
                 self.client.write_points(points)
             except ConnectionError:
                 self.db_disabled = True
-                LOGGER.warning('Unable to write state to influxdb. The database will be disabled, but state will be written to local cache.')
+                LOGGER.warning('Unable to write state to influxdb. '
+                               'The database will be disabled, but '
+                               'state will be written to local cache.')
         else:
-            LOGGER.warning('The database connection is disabled. Writting state to local cache.')
+            LOGGER.warning('The database connection is disabled. '
+                           'Writting state to local cache.')

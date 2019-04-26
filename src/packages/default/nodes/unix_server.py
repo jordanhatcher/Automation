@@ -49,9 +49,11 @@ class UnixServerNode(Node):
         Run loop
         """
 
-        LOGGER.info('Received unix socket input')
 
         data = await reader.read(1000)
+
+        LOGGER.info('Received unix socket input')
+
         message = data.decode()
         LOGGER.debug(f'Received: {message}')
         pub.sendMessage(f'messages.{self.label}', msg={

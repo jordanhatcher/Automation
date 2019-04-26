@@ -5,7 +5,7 @@ unix_server_conditions
 
 import logging
 from pubsub import pub
-from condition import Condition
+from condition import Condition, link
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,15 +19,15 @@ class UnixServerConditions(Condition):
     node
     """
 
-    def __init__(self, scheduler, schedule=None):
+    def __init__(self, *args, **kwargs):
         """
         Constructor
         """
 
-        Condition.__init__(self, scheduler, schedule)
-        pub.subscribe(self.evaluate, 'messages.unix_socket_node')
+        super().__init__(*args, **kwargs)
         LOGGER.debug('Initialized')
 
+    @link
     def evaluate(self, msg):
         """
         Handler for receiving messages
@@ -35,5 +35,5 @@ class UnixServerConditions(Condition):
 
         LOGGER.info('Evaluating')
 
-        if 'stop' == msg['content']:
-            pub.sendMessage('system.stop')
+        if 'stop' == msg['content'].strip():
+            return True
